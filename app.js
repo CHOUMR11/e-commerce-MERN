@@ -8,13 +8,16 @@ const path = require('path'); // Ajout de l'importation de path
 const app = express();
 
 // Importation des routes
+const userRouter =require("./routes/user.route")
 const categorieRouter = require('./routes/categories.route');
 const scategorieRouter = require('./routes/scategories.route');
 const articleRouter = require('./routes/article.route');
 
 
 // Middleware CORS
-app.use(cors())
+app.use(cors({
+    origin:'*'
+    }))
 // Configuration dotenv
 dotenv.config();
 
@@ -23,7 +26,7 @@ if (!process.env.DATABASECLOUD || !process.env.PORT) {
     console.error("Les variables d'environnement DATABASECLOUD et PORT doivent être définies.");
     process.exit(1);
 }
-
+ 
 
 // Middleware pour parser le corps des requêtes en JSON
 app.use(express.json());
@@ -37,20 +40,16 @@ mongoose.connect(process.env.DATABASECLOUD)
         console.error("Erreur lors de la connexion à la base de données :", err);
         process.exit(1);
     });
-
-// Définition des routes
-//app.get("/", (req, res) => {
-   //res.send("Page d'accueil");
-//});
-
+   
+app.use('/api/users', userRouter);
 app.use('/api/categories', categorieRouter);
 app.use('/api/scategories', scategorieRouter);
 app.use('/api/articles', articleRouter);
 
+
 //dist reactjs
 app.use(express.static(path.join(__dirname, './client/build'))); // Route pourles pages non trouvées, redirige vers index.html
 app.get('*', (req, res) => { res.sendFile(path.join(__dirname,'./client/build/index.html')); });
-
 
 // Lancement du serveur
 app.listen(process.env.PORT)
